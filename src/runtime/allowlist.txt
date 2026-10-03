@@ -1,0 +1,36 @@
+# Pred-only egress allowlist (one host per line).
+# Used by the prediction egress proxy; evaluation does not read this file.
+# Exact hostname, or a leading-dot suffix (.example.com matches a.example.com).
+# Official provider hosts only. Do not add github.com, package registries, or transit APIs.
+
+# Official Anthropic (Claude Code, provider=anthropic)
+api.anthropic.com
+
+# Official OpenAI (Codex, provider=openai)
+api.openai.com
+
+# Codex subscription inference and token refresh
+chatgpt.com
+auth.openai.com
+
+# Cursor harness
+.cursor.sh
+.cursor.com
+.cursorapi.com
+
+# Kimi Code official (provider=kimi)
+api.moonshot.cn
+.moonshot.cn
+api.kimi.com
+.kimi.com
+
+# Gemini CLI official (provider=gemini|google)
+generativelanguage.googleapis.com
+
+# DeepSeek Harness official (provider=deepseek)
+api.deepseek.com
+
+# Muse Code official (provider=meta|muse)
+api.meta.ai
+.dev.meta.ai
+.meta.ai

@@ -1,0 +1,18 @@
+# Your own settings and run output. Only *.example templates are tracked.
+configs/*
+!configs/*.example
+.env
+.env.*
+!.env.example
+secrets/
+runs/
+
+.venv/
+.cache/
+*.egg-info/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+build/
+dist/

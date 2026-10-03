@@ -1,0 +1,60 @@
+# Export the API key for the harness you run. Keep it in the environment, not in this file.
+# Codex uses OPENAI_API_KEY or CODEX_API_KEY. Claude Code uses ANTHROPIC_API_KEY. Cursor uses CURSOR_API_KEY.
+# Kimi uses KIMI_API_KEY or MOONSHOT_API_KEY. Gemini uses GEMINI_API_KEY. DeepSeek uses DEEPSEEK_API_KEY. Muse uses META_API_KEY or MODEL_API_KEY.
+# Copy to configs/config.toml. Shown values are Codex.
+
+[dataset]
+repo = "EVIGBYEN/SWEeper-Bench"
+file = "data/test.jsonl"
+revision = "main"
+reference_patches = "data/patches"  # Local folder of <case_id>.patch. Withheld for now to avoid leaking it.
+
+[modal]
+app = "sweeper-bench"
+region = "us-east"
+cpu = 8
+memory_mb = 16384
+timeout_seconds = 86400             # Set how long one VM may run, in seconds. 86400 is 24 hours, not the per-case limit.
+# profile = "MODAL-PROFILE"
+
+[images]
+registry = "ghcr.io"
+owner = "evigbyen"
+user = "evigbyen"
+tag = "alpha"
+
+[prediction]
+time_budget = "unlimited"           # Only Codex and Claude Code take a number of minutes, plus 5 min grace and 5 min to submit. Default is unlimited.
+harness = "codex"                   # Or claude-code, cursor, kimi-code, gemini-cli, deepseek-harness, or muse-code.
+provider = "openai"                 # Or anthropic, cursor, kimi, gemini, google, deepseek, meta, or muse.
+model = "gpt-6-astra"               # Or claude-fable-5-1, grok-4.6, kimi-k3, gemini-2.5-pro, deepseek-v4.1-flash, or muse-spark-1.3.
+effort = "xhigh"
+level = "scoped"                    # Or specified.
+prompt_templates = "non-browser"    # Or browser.
+accounts = ["prediction"]
+timeout_seconds = 28800             # Set the limit for one prediction case, in seconds. 28800 is 8 hours.
+egress = true
+skip_failed_tasks = 1
+
+[evaluation]
+harness = "codex"                   # Or browser-use.
+provider = "openai"                 # For browser-use, use openai or anthropic.
+model = "gpt-5.6-luna"
+effort = "xhigh"
+phases = ["prediction"]             # Can also include baseline and reference. A reference phase reads reference_patches/<case_id>.patch.
+categories = "target,preservation"  # Can also be target or preservation alone.
+accounts = ["evaluation"]
+timeout_seconds = 10800             # Set the limit for one evaluation case, in seconds. 10800 is 3 hours.
+record = 0                          # Set 1 to save video. The default 0 does not record the browser.
+skip_failed_tasks = 1
+drop_caches = 1
+
+[accounts.prediction]
+harness = "codex"                   # Must match prediction.harness.
+auth = "api"                        # Or subscription. Codex reads auth_file or CODEX_AUTH_JSON. Claude reads an sk-ant-oat token from auth_file or CLAUDE_CODE_OAUTH_TOKEN.
+concurrency = 5                     # Set how many VMs this account opens. Cases on one VM run one after another.
+
+[accounts.evaluation]
+harness = "codex"                   # Must match evaluation.harness.
+auth = "api"                        # Or subscription for Codex. Point auth_file or CODEX_AUTH_JSON at the login JSON.
+concurrency = 5                     # Set how many VMs this account opens. Cases on one VM run one after another.
