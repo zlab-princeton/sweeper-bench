@@ -135,7 +135,7 @@ Use [configs/config.toml.example](../configs/config.toml.example) for all suppor
 | `evaluation` | Harness/provider/model/effort/accounts, `phases`, `categories`, `record`, `drop_caches`, timeout |
 | `accounts.<name>` | `harness`, `auth`, `concurrency`; subscription `auth_file` or `auth_env` |
 
-`prediction.level = "scoped"` gives a broad area to investigate; `"specified"` gives the detailed bug description. `prediction.prompt_templates` selects the pred wrapper: `"non-browser"` (default) reads [task-templates-non-browser.md](../src/runtime/prompts/task-templates-non-browser.md); `"browser"` reads [task-templates-browser.md](../src/runtime/prompts/task-templates-browser.md). The verifier task is constructed in [browser.py](../src/runtime/browser.py), with Codex-specific instructions in its [adapter](../src/runtime/harnesses/evaluation/codex.py).
+`prediction.level = "scoped"` gives a broad area to investigate; `"specified"` gives the detailed bug description. `prediction.prompt_templates` selects the pred wrapper: `"browser"` (default) reads [task-templates-browser.md](../src/runtime/prompts/task-templates-browser.md); `"non-browser"` reads [task-templates-non-browser.md](../src/runtime/prompts/task-templates-non-browser.md), which drops the instruction to test in the browser. The verifier task is constructed in [browser.py](../src/runtime/browser.py), with Codex-specific instructions in its [adapter](../src/runtime/harnesses/evaluation/codex.py).
 
 Evaluation phases:
 

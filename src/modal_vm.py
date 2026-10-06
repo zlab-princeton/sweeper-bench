@@ -309,7 +309,7 @@ class Backend:
                 "effort": pred.get("effort", "xhigh"),
                 "level": pred.get("level", "scoped"),
                 "time_budget": pred.get("time_budget", "unlimited"),
-                "prompt_templates": pred.get("prompt_templates", "non-browser"),
+                "prompt_templates": pred.get("prompt_templates", "browser"),
             },
             "evaluation": {
                 "harness": ev.get("harness", ""),

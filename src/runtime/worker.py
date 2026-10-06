@@ -210,7 +210,7 @@ def reset_workspace(dest, commit, patch=None):
     run(["git", "apply", *IMAGE_APPLY_EXCLUDES, str(patch)], cwd=dest)
 
 
-def render_prompt(row, level, dest, prompt_templates="non-browser"):
+def render_prompt(row, level, dest, prompt_templates="browser"):
     if level not in row["task"]:
         raise KeyError(f"task has no {level}")
     body = str(row["task"][level]).strip() + "\n"
@@ -351,7 +351,7 @@ def predict_case(task, row):
             row,
             level,
             prompt,
-            task["prediction"].get("prompt_templates") or "non-browser",
+            task["prediction"].get("prompt_templates") or "browser",
         )
         try:
             run_product(workspace, container, product_image, proxy_url)

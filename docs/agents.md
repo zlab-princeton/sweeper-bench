@@ -67,7 +67,7 @@ Codex API mode is official OpenAI only: `provider = "openai"`, with `OPENAI_API_
 
 ### What Codex receives
 
-Prediction receives the selected task inserted into the configured prompt template. `prediction.prompt_templates = "non-browser"` (default) uses [task-templates-non-browser.md](../src/runtime/prompts/task-templates-non-browser.md); `"browser"` uses [task-templates-browser.md](../src/runtime/prompts/task-templates-browser.md). It edits `/workspace/product` and uses `/workspace/task-shell` for product commands. The wrapper executes those commands in the product container and logs them.
+Prediction receives the selected task inserted into the configured prompt template. `prediction.prompt_templates = "browser"` (default) uses [task-templates-browser.md](../src/runtime/prompts/task-templates-browser.md); `"non-browser"` uses [task-templates-non-browser.md](../src/runtime/prompts/task-templates-non-browser.md). It edits `/workspace/product` and uses `/workspace/task-shell` for product commands. The wrapper executes those commands in the product container and logs them.
 
 The prediction command selects the model and `model_reasoning_effort`, disables web search, apps, and multi-agent use, and runs without Codex's own approval/sandbox boundary inside the Docker setup. The network filter and container setup provide the outer restrictions; see [Design §6](design.md#6-isolation-what-is-enforced-what-is-not).
 

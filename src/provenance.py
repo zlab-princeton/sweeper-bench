@@ -19,7 +19,7 @@ def capture(repo, config, rows):
     runtime = repo / 'src/runtime'
     templates = {str(p.relative_to(runtime)): p.read_text() for p in (runtime / 'prompts').glob('*.md')}
     pred = config.get('prediction', {})
-    key = 'prompts/task-templates-' + pred.get('prompt_templates', 'non-browser') + '.md'
+    key = 'prompts/task-templates-' + pred.get('prompt_templates', 'browser') + '.md'
     template = templates.get(key, '')
     minutes = pred.get('time_budget', 'unlimited')
     if isinstance(minutes, (int, float)) and not isinstance(minutes, bool) and minutes > 0:

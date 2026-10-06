@@ -144,7 +144,7 @@ The main settings for a run are in `configs/config.toml`:
 | Setting | Options | What it changes |
 |---|---|---|
 | `prediction.level` | **`scoped`** · `specified` | `scoped` names only a product area. `specified` describes the bug, which turns the task into ordinary bug fixing. |
-| `prediction.prompt_templates` | **`non-browser`** · `browser` | `browser` also tells the agent to test the app in a browser like a real user. The leaderboard uses `browser`. |
+| `prediction.prompt_templates` | **`browser`** · `non-browser` | `browser` tells the agent to test the app in a browser like a real user. `non-browser` drops that instruction. |
 | `prediction.time_budget` | **`"unlimited"`** · minutes | Gives the agent a deadline and tells it to keep working until then. Codex and Claude Code only. |
 | `evaluation.phases` | **`["prediction"]`** · `baseline` · `reference` | Choose what to verify: the agent's patch, the unmodified buggy app, or your own reference patch. |
 

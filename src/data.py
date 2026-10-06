@@ -168,7 +168,7 @@ def prediction_prompt_templates(config):
     pred = config.get("prediction")
     if not isinstance(pred, dict):
         pred = {}
-    name = str(pred.get("prompt_templates", "non-browser")).strip().lower()
+    name = str(pred.get("prompt_templates", "browser")).strip().lower()
     if name not in PROMPT_TEMPLATES:
         raise ValueError(f"prediction.prompt_templates must be one of {PROMPT_TEMPLATES}")
     return name

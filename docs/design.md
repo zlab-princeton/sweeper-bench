@@ -56,7 +56,7 @@ The VM pulls the images and fetches the base commit. The clone path attempts a s
 
 The product container mounts the checkout at `/workspace/product`. [product.sh](../src/runtime/product.sh) publishes its port 3000 to VM loopback port 13200 and invokes `product-yarn start`. Readiness means the root URL returns a non-5xx HTTP response, with a default 600-second startup limit. It does not establish that login, JavaScript assets, or the entire app work.
 
-The coding-agent container mounts the same checkout, the task prompt, output directory, and runtime adapters. The default task level is `scoped`; `specified` deliberately discloses the detailed bug description instead. `prediction.prompt_templates` selects [task-templates-non-browser.md](../src/runtime/prompts/task-templates-non-browser.md) by default, or [task-templates-browser.md](../src/runtime/prompts/task-templates-browser.md).
+The coding-agent container mounts the same checkout, the task prompt, output directory, and runtime adapters. The default task level is `scoped`; `specified` deliberately discloses the detailed bug description instead. `prediction.prompt_templates` selects [task-templates-browser.md](../src/runtime/prompts/task-templates-browser.md) by default, or [task-templates-non-browser.md](../src/runtime/prompts/task-templates-non-browser.md).
 
 The agent normally runs as the image's `agent` user. `/workspace/task-shell` uses a root-controlled product-container name to execute product commands through Docker. The prompt directs all app commands, HTTP, and browser work through this wrapper. Its command log is `status.shell.txt`.
 
