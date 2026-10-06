@@ -6,6 +6,7 @@
 2. [Codex](#2-codex)
 3. [Other harnesses](#3-other-harnesses)
 4. [Mixing agents and accounts](#4-mixing-agents-and-accounts)
+5. [Claude Code subscriptions](#5-claude-code-subscriptions)
 
 ## 1. How agents are configured
 
@@ -27,9 +28,9 @@ auth_file = "/absolute/path/to/codex/auth.json"
 concurrency = 1
 ```
 
-This is a configuration fragment; retain the other sections from the [full template](../configs/config.toml.example). The [README](../README.md#quickstart) provides a complete replacement for both stage and account sections using subscription authentication.
+This is a configuration fragment; retain the other sections from the [full template](../configs/config.toml.example). The [README](../README.md#-quickstart) and the template use API keys; this fragment shows a subscription account instead.
 
-Credentials are read on the host and passed into the Modal VM. Subscription contents are not stored in saved configs. Config paths and environment-variable names are safe to store, but credential values are not. The runner does not look up the old named Modal Secrets.
+Credentials are read on the host and passed into the Modal VM. Subscription contents are not stored in saved configs. Config paths and environment-variable names are safe to store, but credential values are not.
 
 The VM pulls prebuilt harness images from `[images].registry/owner` with the configured tag:
 
@@ -74,7 +75,7 @@ Evaluation receives a workflow and instructions to connect Playwright to an exis
 
 ## 3. Other harnesses
 
-Prediction also supports Claude Code, Cursor, Kimi Code, Gemini CLI, DeepSeek, and Muse Code. Set `prediction.harness`, `provider`, `model`, and the matching account together. The alternatives are commented in [config.toml.example](../configs/config.toml.example).
+Prediction also supports Claude Code, Cursor, Kimi Code, Gemini CLI, DeepSeek, and Muse Code. Set `prediction.harness`, `provider`, `model`, and the matching account together. The alternatives are listed in the comments of [config.toml.example](../configs/config.toml.example).
 
 Each harness uses its official API. Claude Code uses `provider = "anthropic"` and `ANTHROPIC_API_KEY`. Kimi Code uses `provider = "kimi"` and `KIMI_API_KEY` or `MOONSHOT_API_KEY` against `api.moonshot.cn`. Gemini CLI uses `provider = "gemini"` or `"google"` and `GEMINI_API_KEY`. DeepSeek uses `provider = "deepseek"` and `DEEPSEEK_API_KEY` against `api.deepseek.com`. Muse Code uses `provider = "meta"` and `META_API_KEY` or `MODEL_API_KEY` against `api.meta.ai`. Cursor uses `CURSOR_API_KEY`. Timed prediction is `[prediction].time_budget`; `"unlimited"` is the default, and a positive budget is valid only for Codex and Claude Code.
 
@@ -108,7 +109,7 @@ Set `accounts = ["first", "second"]` in each desired stage. One VM runs a shard 
 
 Multiple subscription accounts have independent auth selectors. API accounts share the host environment unless an account sets `api_key_env`. That variable is copied into the VM under `api_key_name`, or under the same name when `api_key_name` is omitted. See [runner.py](../src/runner.py) and [modal_vm.py](../src/modal_vm.py) for the actual scheduling and credential mapping.
 
-## Claude Code subscription prediction
+## 5. Claude Code subscriptions
 
 Use `prediction.harness = "claude-code"`, `provider = "anthropic"`, and an
 account with `harness = "claude-code"`, `auth = "subscription"`. Set its
@@ -131,8 +132,7 @@ neither hidden workflows nor reference patches.
 Artifacts include `trajectory.jsonl` (stream events, terminal result and token
 usage), `claude-sessions.tgz` (native session JSONL files), `prompt.md`,
 `claude-version.txt`, and `final.txt` on success. Failure diagnostics are collected
-before workspace cleanup. Publishing includes these traces and redacts OAuth
-tokens, without uploading credential files.
+before workspace cleanup.
 
 These controls restrict access; they do not prove that arbitrary case images
 contain no clues or that agent-writable evidence is tamper-proof. Review native

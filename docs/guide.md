@@ -12,7 +12,7 @@
 
 ## 1. Install
 
-Python 3.11+ and Git are required locally. Modal runs the apps and agents; local Docker and GPUs are unnecessary. Run commands from the repository root. `scripts/run.py` imports directly from `src/`; there is no package-install step.
+Python 3.11.4+ and Git are required locally. Modal runs the apps and agents; local Docker and GPUs are unnecessary. Run commands from the repository root. `scripts/run.py` imports directly from `src/`; there is no package-install step.
 
 ```bash
 export XDG_CACHE_HOME="$PWD/.cache"
@@ -26,7 +26,7 @@ pip install -r requirements.txt
 cp configs/config.toml.example configs/config.toml
 ```
 
-Use scratch storage on a cluster with home quotas. For a new Modal login, set `MODAL_CONFIG_PATH="$PWD/.cache/modal.toml"` before authentication. Existing logins can continue using their current config. [requirements.txt](../requirements.txt) is the current dependency source; old run-specific environment constraints do not describe this pipeline.
+Use scratch storage on a cluster with home quotas. For a new Modal login, set `MODAL_CONFIG_PATH="$PWD/.cache/modal.toml"` before authentication. Existing logins can continue using their current config.
 
 ## 2. Connect accounts
 
@@ -49,11 +49,11 @@ read -rsp 'GitHub token with image access: ' GHCR_TOKEN; echo
 export GHCR_TOKEN
 ```
 
-The CLI explicitly requires `HF_TOKEN` and `GHCR_TOKEN`. Named Modal Secrets and the old `modal_secret`/`registry_secret` config fields are not used. Codex subscriptions can read a local `auth_file` or an `auth_env` variable. Keep tokens out of the config, because the runner saves that config in the run directory.
+The CLI explicitly requires `HF_TOKEN` and `GHCR_TOKEN`. Codex subscriptions can read a local `auth_file` or an `auth_env` variable. Keep tokens out of the config, because the runner saves that config in the run directory.
 
 ## 3. Run a case
 
-Configure your model and credentials using the [README example](../README.md#quickstart) or [Agents](agents.md). The copied default template uses API credentials and is not automatically configured for your subscription.
+Configure your model and credentials using the [README example](../README.md#-quickstart) or [Agents](agents.md). The copied default template uses API credentials and is not automatically configured for your subscription.
 
 ```bash
 python scripts/run.py --cases sweeper-003 --run-dir runs/first
@@ -120,7 +120,7 @@ For each phase, `artifacts/logs/<phase>-result.json` contains `target` and `pres
 cat runs/first/evaluations/sweeper-003/artifacts/logs/prediction-scoped-result.json
 ```
 
-Report target and preservation separately. If you compute “both checks passed,” state the denominator and keep missing evaluations separate. Enable `evaluation.record = 1` before launching to request videos. Codex writes `trajectory.jsonl`, `last-message.txt`, `execution.json`, and `native-sessions.tgz` under its workflow logs. The current pipeline does not promise the old runner's Playwright trace ZIP for every attempt.
+Report target and preservation separately. If you compute “both checks passed,” state the denominator and keep missing evaluations separate. Enable `evaluation.record = 1` before launching to request videos. Codex writes `trajectory.jsonl`, `last-message.txt`, `execution.json`, and `native-sessions.tgz` under its workflow logs.
 
 ## 5. Configure
 
@@ -148,6 +148,10 @@ For baseline-only verification, set `evaluation.phases = ["baseline"]` and use `
 
 `evaluation.categories` defaults to `target,preservation`. Set it to `target` or `preservation` to run only that check. `drop_caches` defaults to `1`. After each evaluation phase, the VM drops its page cache when it can. Set `0` to leave the cache.
 
+### Timed prediction
+
+`prediction.time_budget` is `"unlimited"` by default, so the agent has no deadline. A positive number of minutes applies to Codex and Claude Code only. The runner then appends [time-budget.md](../src/runtime/prompts/time-budget.md) to the prompt. The deadline starts at the first agent call, after the app is up. If the agent exits successfully before the deadline, the runner resumes the same session until the deadline. Failures and quota errors stop the run. At the budget plus 5 minutes, a still-running agent is stopped and asked to submit, and that submission turn lasts 5 minutes. Set the prediction `timeout_seconds` above the budget plus 10 minutes, with room for startup. Timing is stored in `timed-run.json`.
+
 CLI overrides exist for each stage's harness, model, effort, and account list. Provider, level, phases, recording, image settings, and timeouts are configured in TOML. Check `python scripts/run.py --help` for the exact flags.
 
 For reproducibility, pin `dataset.revision` to a commit SHA; `dataset.json` records the resolved SHA even when using `main`. Also retain the runner commit, config, prompt, and image digests from pull logs. An image tag such as `alpha` can move, and identical model outcomes are not guaranteed.
@@ -171,6 +175,6 @@ Inspect `worker.stderr.log`, `worker.stdout.log`, and `tmp/shard-*/boot.*.log` w
 
 ## 7. Development checks
 
-For documentation/config edits, check Markdown links, TOML parsing, and `python scripts/run.py --help`. `git diff --check` catches whitespace errors. There is no longer a `scripts/smoke.py` or the previous packaged `src/sweeperbench` layout; historical scripts importing that package need migration.
+For documentation/config edits, check Markdown links, TOML parsing, and `python scripts/run.py --help`. `git diff --check` catches whitespace errors.
 
 For runtime changes, exercise the relevant credential, container, or browser path before running a large batch. A real Modal smoke run is billed and needs service access. Do not edit runtime files while Modal is building a bootstrap image from them: changing build inputs mid-upload can abort the build.

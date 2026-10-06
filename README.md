@@ -1,161 +1,189 @@
-# SWEeper-Bench
+<div align="center">
 
-SWEeper-Bench is a benchmark of 200 real bugs in 200 interactive web applications. Each task asks a coding agent to find and fix problems in a named product area. The bug shows up only after a sequence of ordinary user actions, so the agent has to explore the running application. This repository is the runner: it loads a case, runs prediction, then checks the patch in a browser.
+# 🧹 SWEeper-Bench
 
-The dataset and the GHCR product images are not in this repository. Reference patches are not included either.
+### Can Agents Discover Bugs in Interactive Software?
 
-## How a case runs
+Yang Yao<sup>1\*</sup> &nbsp;·&nbsp; Haozhe Chen<sup>1\*</sup> &nbsp;·&nbsp; Bingyi Kang &nbsp;·&nbsp; Karthik R Narasimhan<sup>1</sup> &nbsp;·&nbsp; Zhuang Liu<sup>1</sup>
 
-1. **Load the case.** The runner downloads one task from the Hugging Face dataset named in `[dataset].repo`: repository URL, `base_commit`, `task_scoped`, `task_specified`, and `workflows`. `workflows` is one YAML string with a target test and a preservation test. Product images are pulled from GHCR under `[images].owner`: `sweeper-NNN-prediction:<tag>` for prediction and `sweeper-NNN:<tag>` for evaluation.
-2. **Start a Modal VM.** Each VM uses `vm_runtime` and runs Docker. `concurrency` is how many VMs an account opens. Cases on one VM run one after another. The VM image contains `src/runtime/` only.
-3. **Prediction.** The VM shallow-clones `base_commit` and starts the app on the VM loopback. A second container runs Codex, Claude Code, Cursor, Kimi, Gemini, DeepSeek, or Muse. The default prompt is `task_scoped` plus the non-browser template. The agent sees `/workspace/product` and does not receive `task_specified`, the workflows, the reference patch, or `reference_commit`. Product commands go through `/workspace/task-shell`. With the browser template, the agent's Playwright reaches the app through a localhost forward. Prediction egress is limited to the selected provider.
-4. **Collect the patch.** Tracked edits, and new source files that are not runtime junk, become `prediction-scoped.patch` at the default level. The case workspace is then deleted. The worker frees the product port before the next case.
-5. **Evaluation.** A later VM starts a clean app, applies the model patch, and runs Codex or browser-use with `--network host`. The verifier follows the two workflows:
-   - **target** — the interactions that expose the bug, and whether the intended behavior is back.
-   - **preservation** — whether nearby behavior still works.
-6. **Record the verdict.** Each workflow is `pass`, `fail`, or `uncertain`. The runner stores the two results separately and does not write a combined score. Patches, logs, and optional browser recordings go to the run directory.
+<sup>1</sup>Princeton University &nbsp;&nbsp;&nbsp; <sup>\*</sup>Equal contribution
 
-The default evaluation phase is `prediction`, expanded to `prediction-scoped`. `baseline` and `reference` are optional. A reference phase reads `data/patches/<case_id>.patch` on the host. A missing reference patch skips that phase.
+<!-- TODO: add the paper and blog post links -->
+[![Paper](https://img.shields.io/badge/Paper-coming_soon-b31b1b?logo=arxiv&logoColor=white)]()
+[![Blog](https://img.shields.io/badge/Blog-coming_soon-3b82f6?logo=googlechrome&logoColor=white)]()
+[![Dataset](https://img.shields.io/badge/🤗_Dataset-SWEeper--Bench-ffcc4d)](https://huggingface.co/datasets/EVIGBYEN/SWEeper-Bench)
+[![Agent traces](https://img.shields.io/badge/🤗_Agent_traces-SWEeper--Bench--traces-ffcc4d)](https://huggingface.co/datasets/EVIGBYEN/SWEeper-Bench-traces)
+[![Leaderboard](https://img.shields.io/badge/🏆_Leaderboard-15_agents-6d28d9)](https://github.com/zlab-princeton/sweeper-bench/tree/leaderboard)
 
-`prediction.prompt_templates` selects the wrapper:
+</div>
 
-- `non-browser` (default) — [task-templates-non-browser.md](src/runtime/prompts/task-templates-non-browser.md)
-- `browser` — [task-templates-browser.md](src/runtime/prompts/task-templates-browser.md), which also asks the agent to test the running app in the browser
+**SWEeper-Bench** tests whether coding agents can find and fix bugs that nobody has reported yet. It has **200 tasks**, each built from a real bug fix in a different open-source web app. The agent gets the codebase and an open-ended request such as *"Find and fix issues in SearXNG's search suggestion interface."* It is not told what the bug is. The bugs only appear after a sequence of normal user actions, so the agent has to run the app and test it. An agentic verifier then checks the patch in a browser, the way a user would.
 
-`prediction.level = "specified"` gives the agent `task_specified` instead of `task_scoped`.
+<p align="center">
+  <img src="assets/pipeline.svg" alt="SWEeper-Bench pipeline: the agent gets a codebase and an open-ended prompt, tests the running app in a sandbox, and writes a patch. An agentic verifier applies the patch to a fresh copy of the app and runs two hidden behavior tests in the browser." width="100%">
+</p>
 
-`HF_TOKEN`, `GHCR_TOKEN`, and the provider key stay in the host environment and are passed into the VM. Do not write them into `configs/config.toml`. Phases, retries, and isolation are in [Design](docs/design.md).
+<p align="center">
+  <a href="#-setup">Setup</a> ·
+  <a href="#-quickstart">Quickstart</a> ·
+  <a href="#-how-a-case-runs">How a case runs</a> ·
+  <a href="#-documentation">Docs</a> ·
+  <a href="#-leaderboard">Leaderboard</a> ·
+  <a href="#-citation">Citation</a>
+</p>
 
-## Quickstart
+## 🔧 Setup
 
-The template runs **Codex on the official OpenAI API**: prediction `gpt-6-astra`, evaluation `gpt-5.6-luna`, `prompt_templates = "non-browser"`. Modal, GHCR pulls, and model calls are billed to you.
+All apps and agents run in [Modal](https://modal.com) cloud VMs. You don't need local Docker or a GPU. You need:
 
-**1. Install.** Python 3.11+ and Git. The runner is not installed as a package.
+| Requirement | Used for |
+|---|---|
+| Python ≥ 3.11.4 and Git | Running the CLI on your machine |
+| [Modal](https://modal.com) account | VMs that run the apps, the agent, and the verifier |
+| [Hugging Face](https://huggingface.co/settings/tokens) token | Downloading the task dataset |
+| GitHub token with `read:packages` | Pulling the prebuilt app and agent images from GHCR |
+| A model provider key, e.g. `OPENAI_API_KEY` | The coding agent and the verifier |
+
+**1. Install.**
 
 ```bash
-git clone <this-repo> && cd <this-repo>
-python3 -m venv .venv && source .venv/bin/activate && pip install -r requirements.txt
+git clone https://github.com/zlab-princeton/sweeper-bench.git
+cd sweeper-bench
+python3 -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt
+cp configs/config.toml.example configs/config.toml
 ```
 
-**2. Connect Modal, Hugging Face, and GHCR.** This repository pulls images. It does not build them.
+**2. Connect your accounts.** Keep credentials in the environment and out of `configs/config.toml`, because the runner copies the config into every run directory.
 
 ```bash
 modal token new
 export HF_TOKEN=hf_...
-export GHCR_TOKEN=ghp_...          # read:packages on the image owner
-export GHCR_USER=...               # same value as [images].user
-export OPENAI_API_KEY=...
+export GHCR_USER=your-github-username
+export GHCR_TOKEN=ghp_...          # needs read:packages
+export OPENAI_API_KEY=sk-...
 ```
 
-**3. Configure.** Copy the template. Account blocks name the harness and auth mode. Stage sections select the account, model, and effort.
+The default config runs **Codex on the official OpenAI API**. `gpt-6-astra` fixes the bug and `gpt-5.6-luna` verifies the fix. You pay for Modal and model usage.
 
-```bash
-cp configs/config.toml.example configs/config.toml
-```
+## 🚀 Quickstart
 
-```toml
-[prediction]
-harness = "codex"
-provider = "openai"
-model = "gpt-6-astra"
-effort = "xhigh"
-level = "scoped"
-prompt_templates = "non-browser"
-accounts = ["prediction"]
-
-[evaluation]
-harness = "codex"
-provider = "openai"
-model = "gpt-5.6-luna"
-effort = "xhigh"
-phases = ["prediction"]
-accounts = ["evaluation"]
-
-[accounts.prediction]
-harness = "codex"
-auth = "api"
-concurrency = 5
-
-[accounts.evaluation]
-harness = "codex"
-auth = "api"
-concurrency = 5
-```
-
-Set `prompt_templates` to `browser` to add browser testing to the prediction prompt. Other harnesses are commented in `configs/config.toml.example`. For browser-use evaluation, set `evaluation.harness = "browser-use"` and use the same harness on the evaluation account. See [Agents](docs/agents.md).
-
-A Codex subscription uses a local login file. Put the path in the account block, not the file contents:
-
-```toml
-[accounts.codex]
-harness = "codex"
-auth = "subscription"
-auth_file = "/absolute/path/to/your/codex/auth.json"
-concurrency = 1
-```
-
-Point `prediction.accounts` or `evaluation.accounts` at `["codex"]`. The runner reads that file, or `CODEX_AUTH_JSON`, and passes it into the VM.
-
-**4. Run.** `--cases`, `--cases-file`, or `--all` is required. A cases file is whitespace-separated IDs and may contain `#` comments. Omitted flags come from `configs/config.toml`.
+**Run one case.** This command runs the agent on task `sweeper-001` and then verifies its patch.
 
 ```bash
 python scripts/run.py --cases sweeper-001 --run-dir runs/first
 ```
 
-| Command | Does |
-|---|---|
-| `run` (default) | `predict`, then `evaluate` |
-| `predict` | Start the app, run the coding agent, collect the patch |
-| `evaluate` | Apply a patch on a fresh app and run the browser verifier |
-| `status` | Print summaries for a run directory |
-
-```bash
-python scripts/run.py predict  --cases sweeper-001 --run-dir runs/first
-python scripts/run.py evaluate --cases sweeper-001 --predictions runs/first --run-dir runs/eval-2
-python scripts/run.py status   --run-dir runs/first
-```
-
-A prediction directory is single-use unless you pass `--resume`. Resume keeps finished results and adds new case rows to `cases.json`. If a VM dies, the host recovers statuses already written under `predictions/` or `evaluations/`. `evaluate` may write into an existing directory. The exit code is `0` only when every selected case is `completed`.
-
-**5. Read the verdict.** Case `status` is `completed`, `incomplete`, `skipped`, or `infrastructure_failed`. A completed prediction means a nonempty source patch was collected. Workflow verdicts are in the evaluation artifacts.
+**Read the result.**
 
 ```bash
 python scripts/run.py status --run-dir runs/first
-cat runs/first/evaluations/sweeper-001/result.json
-cat runs/first/evaluations/sweeper-001/artifacts/result.jsonl
 cat runs/first/evaluations/sweeper-001/artifacts/logs/prediction-scoped-result.json
 ```
 
-### Timed prediction
+The verifier reports two behavior tests, and each one is `pass`, `fail`, or `uncertain`:
 
-`prediction.time_budget` is `"unlimited"` in the template, so the agent has no deadline. A positive number of minutes applies to Codex and Claude Code only. The runner then appends [time-budget.md](src/runtime/prompts/time-budget.md). The deadline starts at the first agent call, after the app is up. An early successful exit resumes the same session until the deadline. Failures and quota errors stop. At the budget plus 5 minutes, a still-running agent is stopped and asked to submit. That submission turn lasts 5 minutes. Set the prediction case `timeout_seconds` above the budget plus 10 minutes, with room for startup. Timing is stored in `timed-run.json`.
+- **target**: the bug is fixed and the feature now works as intended.
+- **preservation**: nearby behavior still works.
 
-## Docs
+A task counts as solved only if **both pass**.
 
-- [Guide](docs/guide.md) — install, run, read results, resume
-- [Agents](docs/agents.md) — harnesses, models, accounts
-- [Design](docs/design.md) — pipeline, retries, isolation
-- [Manual walkthrough](docs/manual-walkthrough.md) — images and Codex directly on Modal, outside this runner
+**Run more cases.**
 
-## Layout
-
-```
-scripts/run.py                CLI
-configs/config.toml.example   Template. Copy to configs/config.toml
-src/                          Host runner
-src/runtime/                  Copied into each VM
-docs/                         Guide, agents, design, walkthrough
+```bash
+python scripts/run.py --cases sweeper-001 sweeper-002 --run-dir runs/batch  # a few cases
+python scripts/run.py --cases-file my-cases.txt --run-dir runs/batch        # IDs from a file
+python scripts/run.py --all --run-dir runs/full                             # all 200 cases
+python scripts/run.py --all --run-dir runs/full --resume                    # pick up where it stopped
 ```
 
-A run writes `runs/<name>/` with `config.json`, `dataset.json`, `cases.json`, summaries, `predictions/<case>/artifacts/prediction-scoped.patch`, and `evaluations/<case>/artifacts/result.jsonl`. Optional reference patches live in `data/patches/<case_id>.patch`.
+**Run the two stages separately.** For example, you can verify old patches again with a new verifier.
 
-## Citation
+```bash
+python scripts/run.py predict  --cases sweeper-001 --run-dir runs/pred
+python scripts/run.py evaluate --cases sweeper-001 --predictions runs/pred --run-dir runs/eval
+```
+
+**Evaluate a different agent.** Change the `[prediction]` section and add an account with the same harness. For example, Claude Code:
+
+```toml
+[prediction]
+harness  = "claude-code"
+provider = "anthropic"
+model    = "claude-fable-5-1"
+accounts = ["claude"]
+
+[accounts.claude]
+harness     = "claude-code"
+auth        = "api"            # reads ANTHROPIC_API_KEY
+concurrency = 5                # number of VMs to run in parallel
+```
+
+| Harness | `provider` | Key |
+|---|---|---|
+| `codex` | `openai` | `OPENAI_API_KEY`, or a ChatGPT subscription |
+| `claude-code` | `anthropic` | `ANTHROPIC_API_KEY`, or a Claude subscription token |
+| `cursor` | `cursor` | `CURSOR_API_KEY` |
+| `kimi-code` | `kimi` | `KIMI_API_KEY` |
+| `gemini-cli` | `gemini` | `GEMINI_API_KEY` |
+| `deepseek-harness` | `deepseek` | `DEEPSEEK_API_KEY` |
+| `muse-code` | `meta` | `META_API_KEY` |
+
+For subscription logins, multiple accounts, and the browser-use verifier, see [Agents](docs/agents.md).
+
+## 🔍 How a case runs
+
+1. **Load the task.** The runner downloads one task from the [dataset](https://huggingface.co/datasets/EVIGBYEN/SWEeper-Bench). A task contains the app's repository and buggy commit, the prompt for the agent, and two hidden behavior tests.
+2. **Start the app.** A Modal VM pulls the app's prebuilt image, checks out the buggy commit, and serves the app on `127.0.0.1:13200`.
+3. **Let the agent work.** The coding agent runs in its own container with the source code at `/workspace/product`. It gets only the prompt. It never sees the behavior tests, the bug description, or the reference fix. It can run the app and drive it with Playwright, and its network can reach only model provider APIs.
+4. **Collect the patch.** When the agent exits, its code changes are saved as `prediction-scoped.patch`.
+5. **Verify.** A new VM starts a clean copy of the app and applies the patch. An agentic verifier then runs the **target** and **preservation** tests in a real browser. Both results are saved separately.
+
+The main settings for a run are in `configs/config.toml`:
+
+| Setting | Options | What it changes |
+|---|---|---|
+| `prediction.level` | **`scoped`** · `specified` | `scoped` names only a product area. `specified` describes the bug, which turns the task into ordinary bug fixing. |
+| `prediction.prompt_templates` | **`non-browser`** · `browser` | `browser` also tells the agent to test the app in a browser like a real user. The leaderboard uses `browser`. |
+| `prediction.time_budget` | **`"unlimited"`** · minutes | Gives the agent a deadline and tells it to keep working until then. Codex and Claude Code only. |
+| `evaluation.phases` | **`["prediction"]`** · `baseline` · `reference` | Choose what to verify: the agent's patch, the unmodified buggy app, or your own reference patch. |
+
+Defaults are in **bold**. Each run saves the agent's patch, its full trajectory, the verifier's logs, and optional browser videos under `runs/<name>/`.
+
+## 📚 Documentation
+
+| Doc | Read it for |
+|---|---|
+| [**Guide**](docs/guide.md) | Every config option, the run directory layout, case statuses, resuming and recovering runs, time budgets |
+| [**Agents**](docs/agents.md) | Setup for each harness, API keys and subscriptions, mixing models and accounts, the two verifiers |
+| [**Design**](docs/design.md) | Pipeline internals, retries, what the sandbox does and does not enforce, code map |
+| [**Manual walkthrough**](docs/manual-walkthrough.md) | Running one case by hand on Modal without this runner |
+
+## 🏆 Leaderboard
+
+The best of 15 frontier agents passes only **59.0%** of tasks. If you give agents a description of the bug, they pass about 96%. Finding the bug is the hard part, not fixing it.
+
+<p align="center">
+  <img src="assets/leaderboard.svg" alt="Pass rate versus mean cost per task for 15 agents. Grok 4.6 leads at 59.0%." width="90%">
+</p>
+
+The [full leaderboard](https://github.com/zlab-princeton/sweeper-bench/tree/leaderboard) has per-task results for every agent and the ablations (bug description given, browser instruction removed, harness, and time budget). Every agent trajectory is in the [agent trace dataset](https://huggingface.co/datasets/EVIGBYEN/SWEeper-Bench-traces).
+
+## 📦 The tasks
+
+<p align="center">
+  <img src="assets/task_domains.svg" alt="200 tasks from 200 real-world web applications across seven domains" width="65%">
+</p>
+
+Each task comes from a merged pull request that fixes a user-facing bug. The parent commit is the buggy version, and the merged fix is the reference repair. The apps span seven domains, and the median repository has 4.6k GitHub stars. The [dataset card](https://huggingface.co/datasets/EVIGBYEN/SWEeper-Bench) describes the fields.
+
+## 📝 Citation
 
 ```bibtex
 @misc{sweeperbench2026,
-  title        = {SWEeper-Bench: Can Agents Discover Bugs in Interactive Software?},
-  author       = {Yang Yao and Haozhe Chen and Bingyi Kang and Karthik R Narasimhan and Zhuang Liu},
-  year         = {2026},
-  note         = {Preprint. Yang Yao and Haozhe Chen contributed equally.}
+  title  = {SWEeper-Bench: Can Agents Discover Bugs in Interactive Software?},
+  author = {Yang Yao and Haozhe Chen and Bingyi Kang and Karthik R Narasimhan and Zhuang Liu},
+  year   = {2026},
+  note   = {Yang Yao and Haozhe Chen contributed equally.}
 }
 ```

@@ -26,7 +26,7 @@ flowchart TD
 
 The `run` command waits for the full prediction stage before starting evaluation. A VM is reused within a stage's shard, but evaluation uses a new pool. The scheduler terminates each VM in a `finally` block. Case startup failures can leave resources inside a still-running shard VM, so resource reuse is not equivalent to a brand-new VM per case.
 
-The runner builds the bootstrap image from local runtime files. Product and agent images are pulled, not built, by the worker. Python/browser tools for the agents come from those published images; the old per-case dedicated-Python installation and cross-sandbox tunnel are no longer part of this flow.
+The runner builds the bootstrap image from local runtime files. Product and agent images are pulled, not built, by the worker. Python/browser tools for the agents come from those published images.
 
 ## 2. A case
 
@@ -72,7 +72,7 @@ Evaluation clones the base, restores any incoming output when reusing a run, and
 
 A missing reference patch skips that phase. Missing prediction inputs are handled by the host before VM execution. No runnable phases means there is no complete evaluation to report.
 
-For each runnable phase, the worker resets the checkout and starts a fresh product container. The verifier runs in a separate container with `--network host` and uses `http://127.0.0.1:13200`. It needs neither an HTTPS tunnel nor the earlier local tunnel proxy. The product checkout is not mounted into the verifier.
+For each runnable phase, the worker resets the checkout and starts a fresh product container. The verifier runs in a separate container with `--network host` and uses `http://127.0.0.1:13200`. The product checkout is not mounted into the verifier.
 
 Workflows run sequentially. Each creates a browser session and applies any supported localStorage setup through Playwright. Target and preservation share the phase's product instance; separate browser contexts do not reset server-side data between workflows.
 
@@ -103,7 +103,7 @@ With `prediction.egress = true` (default), [pred_net.sh](../src/runtime/pred_net
 
 The agent container mounts the Docker socket for the root helper. The non-root agent is intended to access the product only through the helper; the runner does not provide a proof that this is an adversarially secure boundary. Product-container commands can inspect that container's filesystem, including whatever seed scripts, dependencies, and caches the published image contains. Separate prediction image names alone do not prove those contents are free of benchmark clues.
 
-Evaluation intentionally does not apply the prediction network filter. Its browser profile allows localhost, and its prompt forbids outside browsing, but the verifier container uses host networking and has no equivalent internet egress firewall. This differs from the old restricted HTTPS-tunnel verifier.
+Evaluation intentionally does not apply the prediction network filter. Its browser profile allows localhost, and its prompt forbids outside browsing, but the verifier container uses host networking and has no equivalent internet egress firewall.
 
 The host passes selected subscription credentials to the VM and the relevant agent, not to the product's ordinary environment. Other provider keys present in the host environment can also be forwarded by the runtime's credential mapping. Logs and outputs are evidence for ordinary runs, not a tamper-proof audit trail. Do not infer absence of leakage from a passing verdict alone.
 
