@@ -50,10 +50,10 @@ from huggingface_hub import HfApi, hf_hub_download
 
 case_id = "sweeper-003"
 revision = HfApi().dataset_info(
-    "EVIGBYEN/SWEeper-Bench", revision="main", token=os.environ["HF_TOKEN"]
+    "zlab-princeton/SWEeper-Bench", revision="main", token=os.environ["HF_TOKEN"]
 ).sha
 path = hf_hub_download(
-    "EVIGBYEN/SWEeper-Bench", "data/test.jsonl",
+    "zlab-princeton/SWEeper-Bench", "data/test.jsonl",
     repo_type="dataset", revision=revision, token=os.environ["HF_TOKEN"],
 )
 rows = [json.loads(line) for line in Path(path).read_text().splitlines() if line.strip()]

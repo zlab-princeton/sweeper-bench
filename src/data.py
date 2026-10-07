@@ -106,7 +106,7 @@ def eval_row(row):
 
 def load_cases(config, ids=None):
     dataset = config["dataset"]
-    repo = dataset.get("repo") or "EVIGBYEN/SWEeper-Bench"
+    repo = dataset.get("repo") or "zlab-princeton/SWEeper-Bench"
     name = dataset.get("file") or "data/test.jsonl"
     token = os.environ.get("HF_TOKEN") or True
     revision = HfApi().dataset_info(

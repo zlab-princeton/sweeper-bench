@@ -153,7 +153,7 @@ def main(argv=None):
     cfg = tomllib.loads(config_path.read_text())
     repo = Path(__file__).resolve().parents[1]
     dataset = cfg.setdefault("dataset", {})
-    dataset.setdefault("repo", "EVIGBYEN/SWEeper-Bench")
+    dataset.setdefault("repo", "zlab-princeton/SWEeper-Bench")
     dataset.setdefault("file", "data/test.jsonl")
     patches = Path(dataset.get("reference_patches") or "data/patches").expanduser()
     if not patches.is_absolute():

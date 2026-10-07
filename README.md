@@ -10,8 +10,8 @@
 
 [![Paper](https://img.shields.io/badge/Paper-PDF-b31b1b?logo=adobeacrobatreader&logoColor=white)](https://sweeperbench.com/sweeperbench.pdf)
 [![Blog](https://img.shields.io/badge/Blog-sweeperbench.com-3b82f6?logo=googlechrome&logoColor=white)](https://sweeperbench.com)
-[![Dataset](https://img.shields.io/badge/🤗_Dataset-SWEeper--Bench-ffcc4d)](https://huggingface.co/datasets/EVIGBYEN/SWEeper-Bench)
-[![Agent traces](https://img.shields.io/badge/🤗_Agent_traces-SWEeper--Bench-ffcc4d)](https://huggingface.co/datasets/EVIGBYEN/SWEeper-Bench/tree/trace)
+[![Dataset](https://img.shields.io/badge/🤗_Dataset-SWEeper--Bench-ffcc4d)](https://huggingface.co/datasets/zlab-princeton/SWEeper-Bench)
+[![Agent traces](https://img.shields.io/badge/🤗_Agent_traces-SWEeper--Bench--traces-ffcc4d)](https://huggingface.co/datasets/zlab-princeton/SWEeper-Bench-traces)
 
 </div>
 
@@ -131,7 +131,7 @@ For subscription logins, multiple accounts, and the browser-use verifier, see [A
 
 ## 🔍 How a case runs
 
-1. **Load the task.** The runner downloads one task from the [dataset](https://huggingface.co/datasets/EVIGBYEN/SWEeper-Bench). A task contains the app's repository and buggy commit, the prompt for the agent, and two hidden behavior tests.
+1. **Load the task.** The runner downloads one task from the [dataset](https://huggingface.co/datasets/zlab-princeton/SWEeper-Bench). A task contains the app's repository and buggy commit, the prompt for the agent, and two hidden behavior tests.
 2. **Start the app.** A Modal VM pulls the app's prebuilt image, checks out the buggy commit, and serves the app on `127.0.0.1:13200`.
 3. **Let the agent work.** The coding agent runs in its own container with the source code at `/workspace/product`. It gets only the prompt. It never sees the behavior tests, the bug description, or the reference fix. It can run the app and drive it with Playwright, and its network can reach only model provider APIs.
 4. **Collect the patch.** When the agent exits, its code changes are saved as `prediction-scoped.patch`.
@@ -165,7 +165,7 @@ The best of 15 frontier agents passes only 59.0% of tasks. If you give agents a 
   <img src="assets/leaderboard.svg" alt="Pass rate versus mean cost per task for 15 agents. Grok 4.6 leads at 59.0%." width="90%">
 </p>
 
-All agent trajectories are on the dataset's [`trace` branch](https://huggingface.co/datasets/EVIGBYEN/SWEeper-Bench/tree/trace).
+All agent trajectories, patches, and verdicts are in [SWEeper-Bench-traces](https://huggingface.co/datasets/zlab-princeton/SWEeper-Bench-traces).
 
 ## 📦 The tasks
 
@@ -173,7 +173,7 @@ All agent trajectories are on the dataset's [`trace` branch](https://huggingface
   <img src="assets/task_domains.svg" alt="200 tasks from 200 real-world web applications across seven domains" width="65%">
 </p>
 
-Each task comes from a merged pull request that fixes a user-facing bug. The parent commit is the buggy version, and the merged fix is the reference repair. The apps span seven domains, and the median repository has 4.6k GitHub stars. The [dataset card](https://huggingface.co/datasets/EVIGBYEN/SWEeper-Bench) describes the fields.
+Each task comes from a merged pull request that fixes a user-facing bug. The parent commit is the buggy version, and the merged fix is the reference repair. The apps span seven domains, and the median repository has 4.6k GitHub stars. The [dataset card](https://huggingface.co/datasets/zlab-princeton/SWEeper-Bench) describes the fields.
 
 ## 📝 Citation
 

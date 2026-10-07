@@ -4,7 +4,7 @@
 # Copy to configs/config.toml. Shown values are Codex.
 
 [dataset]
-repo = "EVIGBYEN/SWEeper-Bench"
+repo = "zlab-princeton/SWEeper-Bench"
 file = "data/test.jsonl"
 revision = "main"
 reference_patches = "data/patches"  # Local folder of <case_id>.patch. Withheld for now to avoid leaking it.
