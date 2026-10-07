@@ -16,7 +16,7 @@
 
 </div>
 
-**SWEeper-Bench** tests whether coding agents can find and fix bugs that nobody has reported yet. It has **200 tasks**, each built from a real bug fix in a different open-source web app. The agent gets the codebase and an open-ended request such as *"Find and fix issues in SearXNG's search suggestion interface."* It is not told what the bug is. The bugs only appear after a sequence of normal user actions, so the agent has to run the app and test it. An agentic verifier then checks the patch in a browser, the way a user would.
+SWEeper-Bench tests whether coding agents can find and fix bugs that nobody has reported yet. It has 200 tasks, each built from a real bug fix in a different open-source web app. The agent gets the codebase and an open-ended request such as *"Find and fix issues in SearXNG's search suggestion interface."* It is not told what the bug is. The bugs only appear after a sequence of normal user actions, so the agent has to run the app and test it. An agentic verifier then checks the patch in a browser, the way a user would.
 
 <p align="center">
   <img src="assets/pipeline.svg" alt="SWEeper-Bench pipeline: the agent gets a codebase and an open-ended prompt, tests the running app in a sandbox, and writes a patch. An agentic verifier applies the patch to a fresh copy of the app and runs two hidden behavior tests in the browser." width="100%">
@@ -63,7 +63,7 @@ export GHCR_TOKEN=ghp_...          # needs read:packages
 export OPENAI_API_KEY=sk-...
 ```
 
-The default config runs **Codex on the official OpenAI API**. `gpt-6-astra` fixes the bug and `gpt-5.6-luna` verifies the fix. You pay for Modal and model usage.
+The default config runs Codex on the official OpenAI API. `gpt-6-astra` fixes the bug and `gpt-5.6-luna` verifies the fix. You pay for Modal and model usage.
 
 ## 🚀 Quickstart
 
@@ -82,10 +82,10 @@ cat runs/first/evaluations/sweeper-001/artifacts/logs/prediction-scoped-result.j
 
 The verifier reports two behavior tests, and each one is `pass`, `fail`, or `uncertain`:
 
-- **target**: the bug is fixed and the feature now works as intended.
-- **preservation**: nearby behavior still works.
+- `target`: the bug is fixed and the feature now works as intended.
+- `preservation`: nearby behavior still works.
 
-A task counts as solved only if **both pass**.
+A task counts as solved only if both pass.
 
 **Run more cases.**
 
@@ -136,31 +136,31 @@ For subscription logins, multiple accounts, and the browser-use verifier, see [A
 2. **Start the app.** A Modal VM pulls the app's prebuilt image, checks out the buggy commit, and serves the app on `127.0.0.1:13200`.
 3. **Let the agent work.** The coding agent runs in its own container with the source code at `/workspace/product`. It gets only the prompt. It never sees the behavior tests, the bug description, or the reference fix. It can run the app and drive it with Playwright, and its network can reach only model provider APIs.
 4. **Collect the patch.** When the agent exits, its code changes are saved as `prediction-scoped.patch`.
-5. **Verify.** A new VM starts a clean copy of the app and applies the patch. An agentic verifier then runs the **target** and **preservation** tests in a real browser. Both results are saved separately.
+5. **Verify.** A new VM starts a clean copy of the app and applies the patch. An agentic verifier then runs the `target` and `preservation` tests in a real browser. Both results are saved separately.
 
 The main settings for a run are in `configs/config.toml`:
 
 | Setting | Options | What it changes |
 |---|---|---|
-| `prediction.level` | **`scoped`** · `specified` | `scoped` names only a product area. `specified` describes the bug, which turns the task into ordinary bug fixing. |
-| `prediction.prompt_templates` | **`browser`** · `non-browser` | `browser` tells the agent to test the app in a browser like a real user. `non-browser` drops that instruction. |
-| `prediction.time_budget` | **`"unlimited"`** · minutes | Gives the agent a deadline and tells it to keep working until then. Codex and Claude Code only. |
-| `evaluation.phases` | **`["prediction"]`** · `baseline` · `reference` | Choose what to verify: the agent's patch, the unmodified buggy app, or your own reference patch. |
+| `prediction.level` | `scoped` (default) · `specified` | `scoped` names only a product area. `specified` describes the bug, which turns the task into ordinary bug fixing. |
+| `prediction.prompt_templates` | `browser` (default) · `non-browser` | `browser` tells the agent to test the app in a browser like a real user. `non-browser` drops that instruction. |
+| `prediction.time_budget` | `"unlimited"` (default) · minutes | Gives the agent a deadline and tells it to keep working until then. Codex and Claude Code only. |
+| `evaluation.phases` | `["prediction"]` (default) · `baseline` · `reference` | Choose what to verify: the agent's patch, the unmodified buggy app, or your own reference patch. |
 
-Defaults are in **bold**. Each run saves the agent's patch, its full trajectory, the verifier's logs, and optional browser videos under `runs/<name>/`.
+Each run saves the agent's patch, its full trajectory, the verifier's logs, and optional browser videos under `runs/<name>/`.
 
 ## 📚 Documentation
 
 | Doc | Read it for |
 |---|---|
-| [**Guide**](docs/guide.md) | Every config option, the run directory layout, case statuses, resuming and recovering runs, time budgets |
-| [**Agents**](docs/agents.md) | Setup for each harness, API keys and subscriptions, mixing models and accounts, the two verifiers |
-| [**Design**](docs/design.md) | Pipeline internals, retries, what the sandbox does and does not enforce, code map |
-| [**Manual walkthrough**](docs/manual-walkthrough.md) | Running one case by hand on Modal without this runner |
+| [Guide](docs/guide.md) | Every config option, the run directory layout, case statuses, resuming and recovering runs, time budgets |
+| [Agents](docs/agents.md) | Setup for each harness, API keys and subscriptions, mixing models and accounts, the two verifiers |
+| [Design](docs/design.md) | Pipeline internals, retries, what the sandbox does and does not enforce, code map |
+| [Manual walkthrough](docs/manual-walkthrough.md) | Running one case by hand on Modal without this runner |
 
 ## 🏆 Leaderboard
 
-The best of 15 frontier agents passes only **59.0%** of tasks. If you give agents a description of the bug, they pass about 96%. Finding the bug is the hard part, not fixing it.
+The best of 15 frontier agents passes only 59.0% of tasks. If you give agents a description of the bug, they pass about 96%. Finding the bug is the hard part, not fixing it.
 
 <p align="center">
   <img src="assets/leaderboard.svg" alt="Pass rate versus mean cost per task for 15 agents. Grok 4.6 leads at 59.0%." width="90%">
