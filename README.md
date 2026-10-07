@@ -12,8 +12,7 @@ Yang Yao<sup>1\*</sup> &nbsp;·&nbsp; Haozhe Chen<sup>1\*</sup> &nbsp;·&nbsp; B
 [![Paper](https://img.shields.io/badge/Paper-coming_soon-b31b1b?logo=arxiv&logoColor=white)]()
 [![Blog](https://img.shields.io/badge/Blog-coming_soon-3b82f6?logo=googlechrome&logoColor=white)]()
 [![Dataset](https://img.shields.io/badge/🤗_Dataset-SWEeper--Bench-ffcc4d)](https://huggingface.co/datasets/EVIGBYEN/SWEeper-Bench)
-[![Agent traces](https://img.shields.io/badge/🤗_Agent_traces-SWEeper--Bench--traces-ffcc4d)](https://huggingface.co/datasets/EVIGBYEN/SWEeper-Bench-traces)
-[![Leaderboard](https://img.shields.io/badge/🏆_Leaderboard-15_agents-6d28d9)](https://github.com/zlab-princeton/sweeper-bench/tree/leaderboard)
+[![Agent traces](https://img.shields.io/badge/🤗_Agent_traces-SWEeper--Bench-ffcc4d)](https://huggingface.co/datasets/EVIGBYEN/SWEeper-Bench/tree/trace)
 
 </div>
 
@@ -167,7 +166,7 @@ The best of 15 frontier agents passes only **59.0%** of tasks. If you give agent
   <img src="assets/leaderboard.svg" alt="Pass rate versus mean cost per task for 15 agents. Grok 4.6 leads at 59.0%." width="90%">
 </p>
 
-The [full leaderboard](https://github.com/zlab-princeton/sweeper-bench/tree/leaderboard) has per-task results for every agent and the ablations (bug description given, browser instruction removed, harness, and time budget). Every agent trajectory is in the [agent trace dataset](https://huggingface.co/datasets/EVIGBYEN/SWEeper-Bench-traces).
+All agent trajectories are on the dataset's [`trace` branch](https://huggingface.co/datasets/EVIGBYEN/SWEeper-Bench/tree/trace).
 
 ## 📦 The tasks
 
