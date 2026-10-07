@@ -182,7 +182,6 @@ Each task comes from a merged pull request that fixes a user-facing bug. The par
 @misc{sweeperbench2026,
   title  = {SWEeper-Bench: Can Agents Discover Bugs in Interactive Software?},
   author = {Yang Yao and Haozhe Chen and Bingyi Kang and Karthik R Narasimhan and Zhuang Liu},
-  year   = {2026},
-  note   = {Yang Yao and Haozhe Chen contributed equally.}
+  year   = {2026}
 }
 ```
