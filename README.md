@@ -27,7 +27,8 @@ SWEeper-Bench tests whether coding agents can find and fix bugs that nobody has 
   <a href="#-how-a-case-runs">How a case runs</a> ·
   <a href="#-documentation">Docs</a> ·
   <a href="#-leaderboard">Leaderboard</a> ·
-  <a href="#-citation">Citation</a>
+  <a href="#-citation">Citation</a> ·
+  <a href="#-license">License</a>
 </p>
 
 ## 🔧 Setup
@@ -186,3 +187,7 @@ Each task comes from a merged pull request that fixes a user-facing bug. The par
   year    = {2026}
 }
 ```
+
+## 📄 License
+
+The code in this repository is released under the [MIT License](LICENSE). The [dataset](https://huggingface.co/datasets/zlab-princeton/SWEeper-Bench) and [agent traces](https://huggingface.co/datasets/zlab-princeton/SWEeper-Bench-traces) are released under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Each benchmark app keeps its own license.
