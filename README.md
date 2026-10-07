@@ -8,9 +8,8 @@
 
 <sup>1</sup>Princeton University &nbsp;&nbsp;&nbsp; <sup>\*</sup>Equal contribution
 
-<!-- TODO: add the paper and blog post links -->
-[![Paper](https://img.shields.io/badge/Paper-coming_soon-b31b1b?logo=arxiv&logoColor=white)]()
-[![Blog](https://img.shields.io/badge/Blog-coming_soon-3b82f6?logo=googlechrome&logoColor=white)]()
+[![Paper](https://img.shields.io/badge/Paper-PDF-b31b1b?logo=adobeacrobatreader&logoColor=white)](https://sweeperbench.com/sweeperbench.pdf)
+[![Blog](https://img.shields.io/badge/Blog-sweeperbench.com-3b82f6?logo=googlechrome&logoColor=white)](https://sweeperbench.com)
 [![Dataset](https://img.shields.io/badge/🤗_Dataset-SWEeper--Bench-ffcc4d)](https://huggingface.co/datasets/EVIGBYEN/SWEeper-Bench)
 [![Agent traces](https://img.shields.io/badge/🤗_Agent_traces-SWEeper--Bench-ffcc4d)](https://huggingface.co/datasets/EVIGBYEN/SWEeper-Bench/tree/trace)
 
@@ -179,9 +178,11 @@ Each task comes from a merged pull request that fixes a user-facing bug. The par
 ## 📝 Citation
 
 ```bibtex
-@misc{sweeperbench2026,
-  title  = {SWEeper-Bench: Can Agents Discover Bugs in Interactive Software?},
-  author = {Yang Yao and Haozhe Chen and Bingyi Kang and Karthik R Narasimhan and Zhuang Liu},
-  year   = {2026}
+@article{yao2026sweeperbench,
+  title   = {SWEeper-Bench: Can Agents Discover Bugs in Interactive Software?},
+  author  = {Yao, Yang and Chen, Haozhe and Kang, Bingyi and
+             Narasimhan, Karthik R and Liu, Zhuang},
+  journal = {arXiv preprint},
+  year    = {2026}
 }
 ```
