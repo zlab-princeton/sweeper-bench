@@ -4,7 +4,7 @@
 
 ### Can Agents Discover Bugs in Interactive Software?
 
-Yang Yao<sup>1\*</sup> &nbsp;·&nbsp; Haozhe Chen<sup>1\*</sup> &nbsp;·&nbsp; Bingyi Kang &nbsp;·&nbsp; Karthik R Narasimhan<sup>1</sup> &nbsp;·&nbsp; Zhuang Liu<sup>1</sup>
+[Yang Yao](https://evigbyen.github.io/)<sup>1\*</sup> &nbsp;·&nbsp; [Haozhe Chen](https://tonychen.xyz/)<sup>1\*</sup> &nbsp;·&nbsp; [Bingyi Kang](https://bingyikang.com/) &nbsp;·&nbsp; [Karthik R Narasimhan](https://www.cs.princeton.edu/~karthikn/)<sup>1</sup> &nbsp;·&nbsp; [Zhuang Liu](https://liuzhuang13.github.io/)<sup>1</sup>
 
 <sup>1</sup>Princeton University &nbsp;&nbsp;&nbsp; <sup>\*</sup>Equal contribution
 
